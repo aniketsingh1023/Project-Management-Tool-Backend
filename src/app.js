@@ -23,7 +23,7 @@ app.use(cors({
 //importing routes
 
 import healthCheckRouter from "./routes/healthCheck.routes.js";
-
+import authRouter from "./routes/auth.routes.js"
 
 app.use("/api/v1/healthcheck",healthCheckRouter)
 // respond with "hello world" when a GET request is made to the homepage
@@ -31,6 +31,7 @@ app.get('/', (req, res) => {
   res.send('hello world')
 })
 
+app.use("/api/v1/auth", authRouter)
 
 
 export default app;

@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import crypto from "crypto"
+import crypto from "crypto";
 const userSchema = new Schema(
   {
     avatar: {
@@ -31,11 +31,11 @@ const userSchema = new Schema(
     },
     fullName: {
       type: String,
-      trim: True,
+      trim: true,
     },
     password: {
       type: String,
-      requred: [true, "Password is required"],
+      required: [true, "Password is required"],
     },
     isEmailVerified: {
       type: Boolean,
@@ -90,29 +90,27 @@ userSchema.methods.generateAccessToken = function () {
 };
 
 //generate refresh token using jwt
-userSchema.methods.generateRefreshToken = function(){
-    return jwt.sign(
-        {
-            //use shorter payloads for refresh token -good practice
-            _id: this._id,
+userSchema.methods.generateRefreshToken = function () {
+  return jwt.sign(
+    {
+      //use shorter payloads for refresh token -good practice
+      _id: this._id,
+    },
+    process.env.REFRESH_TOKEN_SECRET,
+    { expiresIn: process.env.REFRESH_TOKEN_EXPIRY },
+  );
+};
 
-        },
-        process.env.REFRESH_TOKEN_SECRET,
-        {expiresIn: process.env.REFRESH_TOKEN_EXPIRY}
-    
-    )
-}
+//temporary token - without jwt for forgot password using crypto library
+userSchema.methods.generateTemporaryToken = function () {
+  const unHashedToken = crypto.randomBytes(20).toString("hex");
 
-//temporary token - without jwt for forgot password using crypto library 
-userSchema.methods.generateTemporaryToken = function(){
- const unHashedToken =  crypto.randomBytes(20).toString("hex")
-
- const hashedToken = crypto
+  const hashedToken = crypto
     .createHash("sha256")
     .update(unHashedToken)
-    .digest("hex")
-    
- const tokenExpiry = Date.now() + (20*60*1000)
- return{unHashedToken,hashedToken,tokenExpiry}   
+    .digest("hex");
+
+  const tokenExpiry = Date.now() + 20 * 60 * 1000;
+  return { unHashedToken, hashedToken, tokenExpiry };
 };
-export const User = mongoose.models("User", userSchema);
+export const User = mongoose.model("User", userSchema);
